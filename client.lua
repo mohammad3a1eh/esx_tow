@@ -16,6 +16,19 @@ local function getTowConnection(veh)
     return nil, nil
 end
 
+-- ponytail: height = model min.z + 0.5m (bumper above ground). Upgrade when per-model bumper bones exist.
+local function getRearBumperOffset(veh)
+    local minDim, _ = GetModelDimensions(GetEntityModel(veh))
+    if not minDim then return vector3(0.0, -2.5, 0.5) end
+    return vector3(0.0, minDim.y, minDim.z + 0.5)
+end
+
+local function getFrontBumperOffset(veh)
+    local minDim, maxDim = GetModelDimensions(GetEntityModel(veh))
+    if not minDim or not maxDim then return vector3(0.0, 2.5, 0.5) end
+    return vector3(0.0, maxDim.y, minDim.z + 0.5)
+end
+
 local function breakBumperOnSnap(tow)
     if not DoesEntityExist(tow.targetVeh) or not DoesEntityExist(tow.towVeh) then return end
     if not IsVehicleBumperBrokenOff(tow.targetVeh, true) then
