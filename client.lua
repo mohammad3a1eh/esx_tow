@@ -35,12 +35,13 @@ local function getBumperOffset(veh, isFront)
     return getRearBumperOffset(veh)
 end
 
+-- ponytail: GTA V has no dedicated bumper natives; door 4 = bonnet (front), 5 = boot (rear) are the closest.
 local function breakBumperOnSnap(tow)
     if not DoesEntityExist(tow.targetVeh) or not DoesEntityExist(tow.towVeh) then return end
-    if not IsVehicleBumperBrokenOff(tow.targetVeh, true) then
-        SetVehicleBumperBrokenOff(tow.targetVeh, true, true)
-    elseif not IsVehicleBumperBrokenOff(tow.towVeh, false) then
-        SetVehicleBumperBrokenOff(tow.towVeh, false, true)
+    if not IsVehicleDoorDamaged(tow.targetVeh, 4) then
+        SetVehicleDoorBroken(tow.targetVeh, 4, true)
+    elseif not IsVehicleDoorDamaged(tow.towVeh, 5) then
+        SetVehicleDoorBroken(tow.towVeh, 5, true)
     end
 end
 
