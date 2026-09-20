@@ -16,7 +16,16 @@ local function getTowConnection(veh)
     return nil, nil
 end
 
-local function endTowConnection(index)
+local function breakBumperOnSnap(tow)
+    if not DoesEntityExist(tow.targetVeh) or not DoesEntityExist(tow.towVeh) then return end
+    if not IsVehicleBumperBrokenOff(tow.targetVeh, true) then
+        SetVehicleBumperBrokenOff(tow.targetVeh, true, true)
+    elseif not IsVehicleBumperBrokenOff(tow.towVeh, false) then
+        SetVehicleBumperBrokenOff(tow.towVeh, false, true)
+    end
+end
+
+local function endTowConnection(index, snapped)
     local tow = activeTows[index]
     if tow then
         if tow.rope then
@@ -24,7 +33,11 @@ local function endTowConnection(index)
         end
         stuckTimers[tow.towVeh] = nil
         table.remove(activeTows, index)
-        lib.notify({title = 'Towing', description = 'Towing connection ended.', type = 'inform'})
+        if snapped then
+            breakBumperOnSnap(tow)
+        else
+            lib.notify({title = 'Towing', description = 'Towing connection ended.', type = 'inform'})
+        end
     end
 end
 
@@ -44,16 +57,16 @@ CreateThread(function()
                     local towForward = GetEntityForwardVector(tow.towVeh)
                     local relVec = targetPos - towPos
                     local dot = towForward.x * relVec.x + towForward.y * relVec.y + towForward.z * relVec.z
-                    
+
                     if dot > 0 then -- Target is in front of the towing vehicle relative to its forward vector
-                         endTowConnection(i)
+                         endTowConnection(i, true)
                          lib.notify({title = 'Towing', description = 'Rope snapped! Towed vehicle moved ahead.', type = 'error'})
                          goto continue
                     end
 
                     -- 2. Distance Check
                     if dist > maxDistance + 3.0 then
-                        endTowConnection(i)
+                        endTowConnection(i, true)
                         lib.notify({title = 'Towing', description = 'Rope snapped! Distance too great.', type = 'error'})
                         goto continue
                     end
@@ -62,7 +75,7 @@ CreateThread(function()
                     if GetVehicleThrottleOffset(tow.towVeh) > 0.1 and GetEntitySpeed(tow.towVeh) < 0.5 then
                         stuckTimers[tow.towVeh] = (stuckTimers[tow.towVeh] or 0) + GetFrameTime() * 1000
                         if stuckTimers[tow.towVeh] >= stuckThreshold then
-                            endTowConnection(i)
+                            endTowConnection(i, true)
                             lib.notify({title = 'Towing', description = 'Rope snapped! Vehicles were stuck.', type = 'error'})
                             goto continue
                         end
