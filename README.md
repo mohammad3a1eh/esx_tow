@@ -1,5 +1,7 @@
 # ESX Towing Script
 
+> **[📄 مستندات فارسی (README_FA.md)](README_FA.md)**
+
 Realistic rope-based towing system for FiveM (ESX). Attach vehicles with a physical rope, tow them with snap physics, and watch bumpers rip off when you push it too far.
 
 ## Features
